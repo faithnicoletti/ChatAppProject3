@@ -13,8 +13,3 @@ def chat_index(request):
     return render(request, 'chats/index.html', {
         'chats' : chats
     })
-
-class UserCreate(CreateView):
-    model = User
-    fields = '__all__'
-    success_url = reverse_lazy('home')
