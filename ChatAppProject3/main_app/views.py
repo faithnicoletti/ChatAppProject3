@@ -6,19 +6,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
 from django.contrib.auth.models import User
 from django.db import models
-# Define the home view
+
 # class CatCreate(LoginRequiredMixin, CreateView):
 def home(request):
     return render(request, 'home.html')
+  
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     profile_picture = forms.ImageField(required=False)
+
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name', 'last_name',
                   'profile_picture', 'password1', 'password2')
+
 def signup(request):
     error_message = ''
     if request.method == 'POST':
@@ -39,10 +42,16 @@ def signup(request):
     form = SignUpForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
+
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.user.username
+
+
 @login_required
 def profile(request):
     try:
