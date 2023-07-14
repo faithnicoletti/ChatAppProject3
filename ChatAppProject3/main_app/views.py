@@ -7,15 +7,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db import models
 
-# Define the home view
-
 # class CatCreate(LoginRequiredMixin, CreateView):
-
-
 def home(request):
     return render(request, 'home.html')
-
-
+  
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30)
@@ -26,7 +21,6 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name',
                   'profile_picture', 'password1', 'password2')
-
 
 def signup(request):
     error_message = ''
@@ -48,6 +42,7 @@ def signup(request):
     form = SignUpForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
+
 
 
 class Profile(models.Model):
