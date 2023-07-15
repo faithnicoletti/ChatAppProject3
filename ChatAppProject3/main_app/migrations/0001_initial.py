@@ -12,19 +12,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='User',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.CharField(max_length=100)),
-            ],
-        ),
-        migrations.CreateModel(
             name='Chat',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('content', models.TextField(max_length=600)),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('participants', models.ManyToManyField(to='main_app.user')),
             ],
         ),
     ]

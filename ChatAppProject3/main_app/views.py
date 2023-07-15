@@ -17,9 +17,9 @@ class SignUpForm(UserCreationForm):
     last_name = forms.CharField(max_length=30)
     profile_picture = forms.ImageField(required=False)
 
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name', 'last_name',
+class Meta:
+    model = User
+    fields = ('username', 'email', 'first_name', 'last_name',
                   'profile_picture', 'password1', 'password2')
 
 def signup(request):
@@ -48,7 +48,7 @@ def signup(request):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    def __str__(self):
+def __str__(self):
         return self.user.username
 
 
@@ -64,3 +64,6 @@ def profile(request):
         'user': request.user,
     }
     return render(request, 'profile.html', context)
+
+
+
