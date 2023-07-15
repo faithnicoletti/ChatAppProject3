@@ -2,15 +2,20 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
 from django.contrib.auth.models import User
 from django.db import models
 
-# class CatCreate(LoginRequiredMixin, CreateView):
+
 def home(request):
     return render(request, 'home.html')
-  
+
+
+@login_required
+def about(request):
+    return render(request, 'about.html')
+
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30)
@@ -19,8 +24,9 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name',
-                  'profile_picture', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'password1', 'password2')
+
 
 def signup(request):
     error_message = ''
@@ -31,18 +37,22 @@ def signup(request):
             user.email = form.cleaned_data['email']
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
-            if 'profile_picture' in request.FILES:
-                user.profile_picture = request.FILES['profile_picture']
             user.save()
-            Profile.objects.create(user=user)
+            profile_picture = form.cleaned_data['profile_picture']
+            if profile_picture:
+                profile = Profile(user=user, profile_picture=profile_picture)
+            else:
+                profile = Profile(user=user)
+            profile.save()
+
             login(request, user)
-            return redirect('home')
+            return redirect('about')
         else:
             error_message = 'Invalid sign up - try again'
-    form = SignUpForm()
+    else:
+        form = SignUpForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
-
 
 
 class Profile(models.Model):
@@ -50,17 +60,3 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
-
-
-@login_required
-def profile(request):
-    try:
-        profile = request.user.profile
-    except Profile.DoesNotExist:
-        # Create a profile instance if it doesn't exist
-        profile = Profile.objects.create(user=request.user)
-    context = {
-        'profile': profile,
-        'user': request.user,
-    }
-    return render(request, 'profile.html', context)
