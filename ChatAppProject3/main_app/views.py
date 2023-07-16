@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from django.contrib.auth.models import User
 from django.db import models
+from .models import Profile
 
 
 def home(request):
@@ -20,9 +21,9 @@ class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
-    profile_picture = forms.ImageField(required=False)
+    profile_picture = forms.ImageField(required=True)
 
-    class Meta:
+    class Meta(UserCreationForm.Meta):
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'password1', 'password2')
@@ -38,15 +39,12 @@ def signup(request):
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
             user.save()
-            profile_picture = form.cleaned_data['profile_picture']
-            if profile_picture:
-                profile = Profile(user=user, profile_picture=profile_picture)
-            else:
-                profile = Profile(user=user)
-            profile.save()
-
+            profile = Profile.objects.create(
+                user=user,
+                profile_picture=form.cleaned_data['profile_picture']
+            )
             login(request, user)
-            return redirect('about')
+            return redirect('profile')
         else:
             error_message = 'Invalid sign up - try again'
     else:
@@ -55,8 +53,13 @@ def signup(request):
     return render(request, 'registration/signup.html', context)
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+@login_required
+def profile(request):
+    user = request.user
+    try:
+        profile = user.profile
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=user)
 
-    def __str__(self):
-        return self.user.username
+    context = {'user': user, 'profile': profile}
+    return render(request, 'profile.html', context)
